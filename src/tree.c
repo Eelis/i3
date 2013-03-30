@@ -368,11 +368,11 @@ void tree_close_con(kill_window_t kill_window) {
 }
 
 /*
- * Splits (horizontally or vertically) the given container by creating a new
+ * Splits the given container by creating a new
  * container which contains the old one and the future ones.
  *
  */
-void tree_split(Con *con, orientation_t orientation) {
+void tree_split(Con *con, layout_t layout) {
     if (con->type == CT_FLOATING_CON) {
         DLOG("Floating containers can't be split.\n");
         return;
@@ -381,7 +381,7 @@ void tree_split(Con *con, orientation_t orientation) {
     if (con->type == CT_WORKSPACE) {
         if (con_num_children(con) < 2) {
             DLOG("Just changing orientation of workspace\n");
-            con->layout = (orientation == HORIZ) ? L_SPLITH : L_SPLITV;
+            con->layout = layout;
             return;
         } else {
             /* if there is more than one container on the workspace
@@ -402,19 +402,19 @@ void tree_split(Con *con, orientation_t orientation) {
     if (con_num_children(parent) == 1 &&
         (parent->layout == L_SPLITH ||
          parent->layout == L_SPLITV)) {
-        parent->layout = (orientation == HORIZ) ? L_SPLITH : L_SPLITV;
+        parent->layout = layout;
         DLOG("Just changing orientation of existing container\n");
         return;
     }
 
-    DLOG("Splitting in orientation %d\n", orientation);
+    DLOG("Splitting in layout %d\n", layout);
 
     /* 2: replace it with a new Con */
     Con *new = con_new(NULL, NULL);
     TAILQ_REPLACE(&(parent->nodes_head), con, new, nodes);
     TAILQ_REPLACE(&(parent->focus_head), con, new, focused);
     new->parent = parent;
-    new->layout = (orientation == HORIZ) ? L_SPLITH : L_SPLITV;
+    new->layout = layout;
 
     /* 3: swap 'percent' (resize factor) */
     new->percent = con->percent;

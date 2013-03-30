@@ -1228,20 +1228,45 @@ void cmd_move_workspace_to_output(I3_CMD, char *name) {
     ysuccess(true);
 }
 
+bool layout_from_string(char const * layout_str, layout_t * const r) {
+    if (strcmp(layout_str, "stacking") == 0)
+        layout_str = "stacked";
+
+    if (strcmp(layout_str, "default") == 0)
+        *r = L_DEFAULT;
+    else if (strcmp(layout_str, "stacked") == 0)
+        *r = L_STACKED;
+    else if (strcmp(layout_str, "tabbed") == 0)
+        *r = L_TABBED;
+    else if (strcmp(layout_str, "splitv") == 0)
+        *r = L_SPLITV;
+    else if (strcmp(layout_str, "splith") == 0)
+        *r = L_SPLITH;
+    else {
+        ELOG("Unknown layout \"%s\", this is a mismatch between code and parser spec.\n", layout_str);
+        return false;
+    }
+
+    return true;
+}
+
 /*
- * Implementation of 'split v|h|vertical|horizontal'.
+ * Implementation of 'split stacked/tabbed/splith/splitv'.
  *
  */
-void cmd_split(I3_CMD, char *direction) {
+void cmd_split(I3_CMD, char *layout_str) {
+    layout_t layout;
+    if (!layout_from_string(layout_str, &layout)) return;
+
     owindow *current;
     /* TODO: use matches */
-    LOG("splitting in direction %c\n", direction[0]);
+    LOG("splitting with layout %d\n", layout);
     if (match_is_empty(current_match))
-        tree_split(focused, (direction[0] == 'v' ? VERT : HORIZ));
+        tree_split(focused, layout);
     else {
         TAILQ_FOREACH(current, &owindows, owindows) {
             DLOG("matching: %p / %s\n", current->con, current->con->name);
-            tree_split(current->con, (direction[0] == 'v' ? VERT : HORIZ));
+            tree_split(current->con, layout);
         }
     }
 
@@ -1531,25 +1556,10 @@ void cmd_move_direction(I3_CMD, char *direction, char *move_px) {
  *
  */
 void cmd_layout(I3_CMD, char *layout_str) {
-    if (strcmp(layout_str, "stacking") == 0)
-        layout_str = "stacked";
+    layout_t layout;
+    if (!layout_from_string(layout_str, &layout)) return;
+
     owindow *current;
-    int layout;
-    /* default is a special case which will be handled in con_set_layout(). */
-    if (strcmp(layout_str, "default") == 0)
-        layout = L_DEFAULT;
-    else if (strcmp(layout_str, "stacked") == 0)
-        layout = L_STACKED;
-    else if (strcmp(layout_str, "tabbed") == 0)
-        layout = L_TABBED;
-    else if (strcmp(layout_str, "splitv") == 0)
-        layout = L_SPLITV;
-    else if (strcmp(layout_str, "splith") == 0)
-        layout = L_SPLITH;
-    else {
-        ELOG("Unknown layout \"%s\", this is a mismatch between code and parser spec.\n", layout_str);
-        return;
-    }
 
     DLOG("changing layout to %s (%d)\n", layout_str, layout);
 

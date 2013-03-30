@@ -148,9 +148,9 @@ state FULLSCREEN:
   end
       -> call cmd_fullscreen($fullscreen_mode)
 
-# split v|h|vertical|horizontal
+# split stacked/tabbed/splith/splitv
 state SPLIT:
-  direction = 'horizontal', 'vertical', 'v', 'h'
+  direction = 'stacked', 'tabbed', 'splith', 'splitv'
       -> call cmd_split($direction)
 
 # floating enable|disable|toggle

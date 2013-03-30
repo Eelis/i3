@@ -435,6 +435,16 @@ struct Assignment {
     TAILQ_ENTRY(Assignment) assignments;
 };
 
+typedef enum {
+    L_DEFAULT = 0,
+    L_STACKED = 1,
+    L_TABBED = 2,
+    L_DOCKAREA = 3,
+    L_OUTPUT = 4,
+    L_SPLITV = 5,
+    L_SPLITH = 6
+} layout_t;
+
 /**
  * A 'Con' represents everything from the X11 root window down to a single X11 window.
  *
@@ -531,15 +541,7 @@ struct Con {
      * parent and opening new containers). Instead, it stores the requested
      * layout in workspace_layout and creates a new split container with that
      * layout whenever a new container is attached to the workspace. */
-    enum {
-        L_DEFAULT = 0,
-        L_STACKED = 1,
-        L_TABBED = 2,
-        L_DOCKAREA = 3,
-        L_OUTPUT = 4,
-        L_SPLITV = 5,
-        L_SPLITH = 6
-    } layout, last_split_layout, workspace_layout;
+    layout_t layout, last_split_layout, workspace_layout;
     border_style_t border_style;
     /** floating? (= not in tiling layout) This cannot be simply a bool
      * because we want to keep track of whether the status was set by the
