@@ -674,15 +674,6 @@ Con* workspace_next_on_output(void) {
         }
     }
 
-    /* Find first workspace. */
-    if (!next) {
-        NODES_FOREACH(output_get_content(output)) {
-            if (child->type != CT_WORKSPACE)
-                continue;
-            if (!next || (child->num != -1 && child->num < next->num))
-                next = child;
-        }
-    }
 workspace_next_on_output_end:
     return next;
 }
@@ -727,16 +718,6 @@ Con* workspace_prev_on_output(void) {
                 prev = child;
                 goto workspace_prev_on_output_end;
             }
-        }
-    }
-
-    /* Find last workspace. */
-    if (!prev) {
-        NODES_FOREACH_REVERSE(output_get_content(output)) {
-            if (child->type != CT_WORKSPACE)
-                continue;
-            if (!prev || child->num > prev->num)
-                prev = child;
         }
     }
 
