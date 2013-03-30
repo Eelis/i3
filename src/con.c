@@ -1605,15 +1605,15 @@ char *con_get_tree_representation(Con *con) {
     char *buf;
     /* 1) add the Layout type to buf */
     if (con->layout == L_DEFAULT)
-        buf = sstrdup("D[");
+        buf = sstrdup("DEFAULT: ");
     else if (con->layout == L_SPLITV)
-        buf = sstrdup("V[");
+        buf = sstrdup("VSPLIT: ");
     else if (con->layout == L_SPLITH)
-        buf = sstrdup("H[");
+        buf = sstrdup("HSPLIT: ");
     else if (con->layout == L_TABBED)
-        buf = sstrdup("T[");
+        buf = sstrdup("TABS: ");
     else if (con->layout == L_STACKED)
-        buf = sstrdup("S[");
+        buf = sstrdup("STACK: ");
     else {
         ELOG("BUG: Code not updated to account for new layout type\n");
         assert(false);
@@ -1631,10 +1631,5 @@ char *con_get_tree_representation(Con *con) {
         buf = tmp_buf;
     }
 
-    /* 3) close the brackets */
-    char *complete_buf;
-    sasprintf(&complete_buf, "%s]", buf);
-    free(buf);
-
-    return complete_buf;
+    return buf;
 }

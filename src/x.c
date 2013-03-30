@@ -494,10 +494,7 @@ void x_draw_decoration(Con *con) {
         /* we have a split container which gets a representation
          * of its children as title
          */
-        char *title;
-        char *tree = con_get_tree_representation(con);
-        sasprintf(&title, "i3: %s", tree);
-        free(tree);
+        char *title = con_get_tree_representation(con);
 
         draw_text_ascii(title,
                 parent->pixmap, parent->pm_gc,
