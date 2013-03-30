@@ -523,49 +523,34 @@ static bool _tree_next(Con *con, char way, orientation_t orientation, bool wrap)
 
     /* Stop recursing at workspaces after attempting to switch to next
      * workspace if possible. */
+
     if (con->type == CT_WORKSPACE) {
         if (con_get_fullscreen_con(con, CF_GLOBAL)) {
             DLOG("Cannot change workspace while in global fullscreen mode.\n");
             return false;
         }
         Output *current_output = get_output_containing(con->rect.x, con->rect.y);
-        Output *next_output;
 
         if (!current_output)
             return false;
         DLOG("Current output is %s\n", current_output->name);
 
-        /* Try to find next output */
-        direction_t direction;
-        if (way == 'n' && orientation == HORIZ)
-            direction = D_RIGHT;
-        else if (way == 'p' && orientation == HORIZ)
-            direction = D_LEFT;
-        else if (way == 'n' && orientation == VERT)
-            direction = D_DOWN;
-        else if (way == 'p' && orientation == VERT)
-            direction = D_UP;
-        else
-            return false;
-
-        next_output = get_output_next(direction, current_output, CLOSEST_OUTPUT);
-        if (!next_output)
-            return false;
-        DLOG("Next output is %s\n", next_output->name);
 
         /* Find visible workspace on next output */
         Con *workspace = NULL;
-        GREP_FIRST(workspace, output_get_content(next_output->con), workspace_is_visible(child));
-
+        workspace = (way == 'n' ? workspace_next_on_output() : workspace_prev_on_output());
+        // GREP_FIRST(workspace, output_get_content(next_output->con), workspace_is_visible(child));
         /* Show next workspace and focus appropriate container if possible. */
         if (!workspace)
             return false;
 
         workspace_show(workspace);
+        con_focus(workspace);
 
         /* If a workspace has an active fullscreen container, one of its
          * children should always be focused. The above workspace_show()
          * should be adequate for that, so return. */
+        /*
         if (con_get_fullscreen_con(workspace, CF_OUTPUT))
             return true;
 
@@ -574,6 +559,7 @@ static bool _tree_next(Con *con, char way, orientation_t orientation, bool wrap)
             con_focus(focus);
             x_set_warp_to(&(focus->rect));
         }
+        */
         return true;
     }
 
