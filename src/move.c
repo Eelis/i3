@@ -28,23 +28,6 @@ static void insert_con_into(Con *con, Con *target, position_t position) {
     con_detach(con);
     con_fix_percent(con->parent);
 
-    /* When moving to a workspace, we respect the user’s configured
-     * workspace_layout */
-    if (parent->type == CT_WORKSPACE) {
-        Con *split = workspace_attach_to(parent);
-        if (split != parent) {
-            DLOG("Got a new split con, using that one instead\n");
-            con->parent = split;
-            con_attach(con, split, false);
-            DLOG("attached\n");
-            con->percent = 0.0;
-            con_fix_percent(split);
-            con = split;
-            DLOG("ok, continuing with con %p instead\n", con);
-            con_detach(con);
-        }
-    }
-
     con->parent = parent;
 
     if (position == BEFORE) {

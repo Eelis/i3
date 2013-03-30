@@ -76,7 +76,7 @@ Con *workspace_get(const char *num, bool *created) {
         workspace->type = CT_WORKSPACE;
         FREE(workspace->name);
         workspace->name = sstrdup(num);
-        workspace->workspace_layout = config.default_layout;
+        workspace->layout = config.default_layout;
         /* We set ->num to the number if this workspace’s name begins with a
          * positive number. Otherwise it’s a named ws and num will be -1. */
         char *endptr = NULL;
@@ -215,7 +215,7 @@ Con *create_workspace_on_output(Output *output, Con *content) {
 
     ws->fullscreen_mode = CF_OUTPUT;
 
-    ws->workspace_layout = config.default_layout;
+    ws->layout = config.default_layout;
     _workspace_apply_default_orientation(ws);
 
     return ws;
@@ -817,39 +817,6 @@ void ws_force_orientation(Con *ws, orientation_t orientation) {
 
     if (old_focused)
         con_focus(old_focused);
-}
-
-/*
- * Called when a new con (with a window, not an empty or split con) should be
- * attached to the workspace (for example when managing a new window or when
- * moving an existing window to the workspace level).
- *
- * Depending on the workspace_layout setting, this function either returns the
- * workspace itself (default layout) or creates a new stacked/tabbed con and
- * returns that.
- *
- */
-Con *workspace_attach_to(Con *ws) {
-    DLOG("Attaching a window to workspace %p / %s\n", ws, ws->name);
-
-    if (ws->workspace_layout == L_DEFAULT) {
-        DLOG("Default layout, just attaching it to the workspace itself.\n");
-        return ws;
-    }
-
-    DLOG("Non-default layout, creating a new split container\n");
-    /* 1: create a new split container */
-    Con *new = con_new(NULL, NULL);
-    new->parent = ws;
-
-    /* 2: set the requested layout on the split con */
-    new->layout = ws->workspace_layout;
-
-    /* 4: attach the new split container to the workspace */
-    DLOG("Attaching new split %p to workspace %p\n", new, ws);
-    con_attach(new, ws, false);
-
-    return new;
 }
 
 /**

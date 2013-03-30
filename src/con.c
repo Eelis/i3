@@ -156,16 +156,13 @@ void con_attach(Con *con, Con *parent, bool ignore_focus) {
          * workspace or a new split container with the configured
          * workspace_layout).
          */
-        if (con->window != NULL &&
-            parent->type == CT_WORKSPACE &&
-            parent->workspace_layout != L_DEFAULT) {
-            DLOG("Parent is a workspace. Applying default layout...\n");
-            Con *target = workspace_attach_to(parent);
+        if (con->window != NULL && parent->type == CT_WORKSPACE) {
+            DLOG("Parent is a workspace.\n");
 
             /* Attach the original con to this new split con instead */
-            nodes_head = &(target->nodes_head);
-            focus_head = &(target->focus_head);
-            con->parent = target;
+            nodes_head = &(parent->nodes_head);
+            focus_head = &(parent->focus_head);
+            con->parent = parent;
             current = NULL;
 
             DLOG("done\n");
@@ -1218,52 +1215,6 @@ void con_set_layout(Con *con, int layout) {
      * con_set_layout(). */
     if (con->layout == L_SPLITH || con->layout == L_SPLITV)
         con->last_split_layout = con->layout;
-
-    /* When the container type is CT_WORKSPACE, the user wants to change the
-     * whole workspace into stacked/tabbed mode. To do this and still allow
-     * intuitive operations (like level-up and then opening a new window), we
-     * need to create a new split container. */
-    if (con->type == CT_WORKSPACE &&
-        (layout == L_STACKED || layout == L_TABBED)) {
-        if (con_num_children(con) == 0) {
-            DLOG("Setting workspace_layout to %d\n", layout);
-            con->workspace_layout = layout;
-        } else {
-            DLOG("Creating new split container\n");
-            /* 1: create a new split container */
-            Con *new = con_new(NULL, NULL);
-            new->parent = con;
-
-            /* 2: Set the requested layout on the split container and mark it as
-             * split. */
-            new->layout = layout;
-            new->last_split_layout = con->last_split_layout;
-
-            Con *old_focused = TAILQ_FIRST(&(con->focus_head));
-            if (old_focused == TAILQ_END(&(con->focus_head)))
-                old_focused = NULL;
-
-            /* 3: move the existing cons of this workspace below the new con */
-            DLOG("Moving cons\n");
-            Con *child;
-            while (!TAILQ_EMPTY(&(con->nodes_head))) {
-                child = TAILQ_FIRST(&(con->nodes_head));
-                con_detach(child);
-                con_attach(child, new, true);
-            }
-
-            /* 4: attach the new split container to the workspace */
-            DLOG("Attaching new split to ws\n");
-            con_attach(new, con, false);
-
-            if (old_focused)
-                con_focus(old_focused);
-
-            tree_flatten(croot);
-        }
-        con_force_split_parents_redraw(con);
-        return;
-    }
 
     if (layout == L_DEFAULT) {
         /* Special case: the layout formerly known as "default" (in combination
