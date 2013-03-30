@@ -653,7 +653,7 @@ static bool _tree_next(Con *con, char way, orientation_t orientation, bool wrap)
     /* 3: focus choice comes in here. at the moment we will go down
      * until we find a window */
     /* TODO: check for window, atm we only go down as far as possible */
-    con_focus(con_descend_focused(next));
+    con_focus(next);
     return true;
 }
 
