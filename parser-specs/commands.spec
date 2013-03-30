@@ -113,13 +113,13 @@ state WORKSPACE_NUMBER:
   workspace = string
       -> call cmd_workspace_number($workspace)
 
-# focus left|right|up|down
+# focus left|right|up|down|prev|next
 # focus output <output>
 # focus tiling|floating|mode_toggle
 # focus parent|child
 # focus
 state FOCUS:
-  direction = 'left', 'right', 'up', 'down'
+  direction = 'left', 'right', 'up', 'down', 'prev', 'next'
       -> call cmd_focus_direction($direction)
   'output'
       -> FOCUS_OUTPUT

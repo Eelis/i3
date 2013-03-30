@@ -707,6 +707,8 @@ static int detect_version(char *buf) {
                 strncasecmp(bind, "focus right", strlen("focus right")) == 0 ||
                 strncasecmp(bind, "focus up", strlen("focus up")) == 0 ||
                 strncasecmp(bind, "focus down", strlen("focus down")) == 0 ||
+                strncasecmp(bind, "focus prev", strlen("focus prev")) == 0 ||
+                strncasecmp(bind, "focus next", strlen("focus next")) == 0 ||
                 strncasecmp(bind, "border normal", strlen("border normal")) == 0 ||
                 strncasecmp(bind, "border 1pixel", strlen("border 1pixel")) == 0 ||
                 strncasecmp(bind, "border pixel", strlen("border pixel")) == 0 ||

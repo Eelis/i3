@@ -158,7 +158,7 @@ void cmd_kill(I3_CMD, char *kill_mode_str);
 void cmd_exec(I3_CMD, char *nosn, char *command);
 
 /**
- * Implementation of 'focus left|right|up|down'.
+ * Implementation of 'focus left|right|up|down|prev|next'.
  *
  */
 void cmd_focus_direction(I3_CMD, char *direction);

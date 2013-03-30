@@ -609,8 +609,9 @@ static bool _tree_next(Con *con, char way, orientation_t orientation, bool wrap)
 
     /* If the orientation does not match or there is no other con to focus, we
      * need to go higher in the hierarchy */
-    if (con_orientation(parent) != orientation ||
-        con_num_children(parent) == 1)
+
+    if (orientation != NO_ORIENTATION &&
+      (con_orientation(parent) != orientation || con_num_children(parent) == 1))
         return _tree_next(parent, way, orientation, wrap);
 
     Con *current = TAILQ_FIRST(&(parent->focus_head));

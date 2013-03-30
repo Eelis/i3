@@ -1302,7 +1302,7 @@ void cmd_exec(I3_CMD, char *nosn, char *command) {
 }
 
 /*
- * Implementation of 'focus left|right|up|down'.
+ * Implementation of 'focus left|right|up|down|prev|next'.
  *
  */
 void cmd_focus_direction(I3_CMD, char *direction) {
@@ -1316,6 +1316,10 @@ void cmd_focus_direction(I3_CMD, char *direction) {
         tree_next('p', VERT);
     else if (strcmp(direction, "down") == 0)
         tree_next('n', VERT);
+    else if (strcmp(direction, "prev") == 0)
+        tree_next('p', NO_ORIENTATION);
+    else if (strcmp(direction, "next") == 0)
+        tree_next('n', NO_ORIENTATION);
     else {
         ELOG("Invalid focus direction (%s)\n", direction);
         ysuccess(false);
