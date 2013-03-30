@@ -627,6 +627,8 @@ static bool _tree_next(Con *con, char way, orientation_t orientation, bool wrap)
         next = TAILQ_NEXT(current, nodes);
     else next = TAILQ_PREV(current, nodes_head, nodes);
 
+    if (!next) return false;
+
     if (!next) {
         if (!config.force_focus_wrapping) {
             /* If there is no next/previous container, we check if we can focus one
