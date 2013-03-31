@@ -185,9 +185,7 @@ void tree_move_into(bool forward) {
  * D_UP, D_DOWN).
  *
  */
-
 void tree_move(int direction) {
-
     DLOG("Moving in direction %d\n", direction);
     /* 1: get the first parent with the same orientation */
     Con *con = focused;
