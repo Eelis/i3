@@ -15,6 +15,8 @@
  * TOK_UP, TOK_DOWN from cmdparse.l)
  *
  */
+void tree_swap(bool forward);
+void tree_move_parent();
 void tree_move(int direction);
 
 #endif

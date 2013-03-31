@@ -70,12 +70,68 @@ static void attach_to_workspace(Con *con, Con *ws) {
     con_fix_percent(ws);
 }
 
+void tree_move_parent()
+{
+    Con *con = focused;
+
+    if (con->type == CT_WORKSPACE || con->parent->type == CT_WORKSPACE) {
+        return;
+    }
+
+    Con *above = con->parent;
+
+    /* Enforce the fullscreen focus restrictions. */
+    if (!con_fullscreen_permits_focusing(above->parent)) {
+        LOG("Cannot move out of fullscreen container\n");
+        return;
+    }
+
+    insert_con_into(con, above, BEFORE);
+
+    /* We need to call con_focus() to fix the focus stack "above" the container
+     * we just inserted the focused container into (otherwise, the parent
+     * container(s) would still point to the old container(s)). */
+    con_focus(con);
+
+    /* force re-painting the indicators */
+    FREE(con->deco_render_params);
+
+    tree_flatten(croot);
+}
+
+void tree_swap(bool forward) {
+
+    Con *con = focused;
+
+    if (con->type == CT_WORKSPACE) {
+        DLOG("Sorry, not yet implemented: swapping workspaces\n");
+        return;
+    }
+
+    Con *swap = forward ? TAILQ_NEXT(con, nodes)
+                        : TAILQ_PREV(con, nodes_head, nodes);
+
+    if (!swap) return;
+
+    if (forward)
+        TAILQ_SWAP(con, swap, &(swap->parent->nodes_head), nodes);
+    else
+        TAILQ_SWAP(swap, con, &(swap->parent->nodes_head), nodes);
+
+    TAILQ_REMOVE(&(con->parent->focus_head), con, focused);
+    TAILQ_INSERT_HEAD(&(swap->parent->focus_head), con, focused);
+
+    DLOG("Swapped.\n");
+}
+
 /*
  * Moves the current container in the given direction (D_LEFT, D_RIGHT,
  * D_UP, D_DOWN).
  *
  */
+
 void tree_move(int direction) {
+
     DLOG("Moving in direction %d\n", direction);
     /* 1: get the first parent with the same orientation */
     Con *con = focused;
