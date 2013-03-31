@@ -1540,15 +1540,16 @@ void cmd_move_direction(I3_CMD, char *direction, char *move_px) {
         }
         floating_reposition(focused->parent, newrect);
     } else {
-             if (strcmp(direction, "left"    ) == 0) tree_move(D_LEFT);
-        else if (strcmp(direction, "right"   ) == 0) tree_move(D_RIGHT);
-        else if (strcmp(direction, "up"      ) == 0) tree_move(D_UP);
-        else if (strcmp(direction, "down"    ) == 0) tree_move(D_DOWN);
-        else if (strcmp(direction, "parent"  ) == 0) tree_move_parent();
-        else if (strcmp(direction, "swapnext") == 0) tree_swap(true);
-        else if (strcmp(direction, "swapprev") == 0) tree_swap(false);
-        else if (strcmp(direction, "intonext") == 0) tree_move_into(true);
-        else if (strcmp(direction, "intoprev") == 0) tree_move_into(false);
+             if (strcmp(direction, "left"        ) == 0) tree_move(D_LEFT);
+        else if (strcmp(direction, "right"       ) == 0) tree_move(D_RIGHT);
+        else if (strcmp(direction, "up"          ) == 0) tree_move(D_UP);
+        else if (strcmp(direction, "down"        ) == 0) tree_move(D_DOWN);
+        else if (strcmp(direction, "afterparent" ) == 0) tree_move_parent(true);
+        else if (strcmp(direction, "beforeparent") == 0) tree_move_parent(false);
+        else if (strcmp(direction, "swapnext"    ) == 0) tree_swap(true);
+        else if (strcmp(direction, "swapprev"    ) == 0) tree_swap(false);
+        else if (strcmp(direction, "intonext"    ) == 0) tree_move_into(true);
+        else if (strcmp(direction, "intoprev"    ) == 0) tree_move_into(false);
 
         cmd_output->needs_tree_render = true;
     }

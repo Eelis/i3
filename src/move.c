@@ -92,23 +92,20 @@ static void attach_to_workspace(Con *con, Con *ws) {
     con_fix_percent(ws);
 }
 
-void tree_move_parent()
-{
+void tree_move_parent(bool forward) {
     Con *con = focused;
 
     if (con->type == CT_WORKSPACE || con->parent->type == CT_WORKSPACE) {
         return;
     }
 
-    Con *above = con->parent;
-
     /* Enforce the fullscreen focus restrictions. */
-    if (!con_fullscreen_permits_focusing(above->parent)) {
+    if (!con_fullscreen_permits_focusing(con->parent->parent)) {
         LOG("Cannot move out of fullscreen container\n");
         return;
     }
 
-    insert_con_into(con, above, BEFORE);
+    insert_con_into(con, con->parent, forward ? AFTER : BEFORE);
 
     /* We need to call con_focus() to fix the focus stack "above" the container
      * we just inserted the focused container into (otherwise, the parent
