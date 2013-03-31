@@ -47,6 +47,28 @@ static void insert_con_into(Con *con, Con *target, position_t position) {
     CALL(old_parent, on_remove_child);
 }
 
+static void push_con_back(Con *con, Con *parent) {
+
+    Con *old_parent = con->parent;
+
+    con_detach(con);
+    con_fix_percent(con->parent);
+
+    con->parent = parent;
+
+    TAILQ_INSERT_TAIL(&(parent->nodes_head), con, nodes);
+    TAILQ_INSERT_HEAD(&(parent->focus_head), con, focused);
+
+    /* Pretend the con was just opened with regards to size percent values.
+     * Since the con is moved to a completely different con, the old value
+     * does not make sense anyways. */
+    con->percent = 0.0;
+    con_fix_percent(parent);
+
+    CALL(old_parent, on_remove_child);
+}
+
+
 /*
  * This function detaches 'con' from its parent and inserts it at the given
  * workspace.
@@ -122,6 +144,43 @@ void tree_swap(bool forward) {
     TAILQ_INSERT_HEAD(&(swap->parent->focus_head), con, focused);
 
     DLOG("Swapped.\n");
+}
+
+void tree_move_into(bool forward) {
+
+    Con *con = focused;
+
+    if (con->type == CT_WORKSPACE) {
+        DLOG("Not moving workspace\n");
+        return;
+    }
+
+    if (con->parent->type == CT_WORKSPACE && con_num_children(con->parent) == 1) {
+        DLOG("This is the only con on this workspace, not doing anything\n");
+        return;
+    }
+
+    /* Enforce the fullscreen focus restrictions. */
+    if (!con_fullscreen_permits_focusing(con->parent)) {
+        LOG("Cannot move out of fullscreen container\n");
+        return;
+    }
+
+    Con *next = forward ? TAILQ_NEXT(con, nodes)
+                        : TAILQ_PREV(con, nodes_head, nodes);
+
+    if (next && !con_is_leaf(next))
+        push_con_back(con, next);
+
+    /* We need to call con_focus() to fix the focus stack "above" the container
+     * we just inserted the focused container into (otherwise, the parent
+     * container(s) would still point to the old container(s)). */
+    con_focus(con);
+
+    /* force re-painting the indicators */
+    FREE(con->deco_render_params);
+
+    tree_flatten(croot);
 }
 
 /*

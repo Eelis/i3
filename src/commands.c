@@ -1547,6 +1547,9 @@ void cmd_move_direction(I3_CMD, char *direction, char *move_px) {
         else if (strcmp(direction, "parent"  ) == 0) tree_move_parent();
         else if (strcmp(direction, "swapnext") == 0) tree_swap(true);
         else if (strcmp(direction, "swapprev") == 0) tree_swap(false);
+        else if (strcmp(direction, "intonext") == 0) tree_move_into(true);
+        else if (strcmp(direction, "intoprev") == 0) tree_move_into(false);
+
         cmd_output->needs_tree_render = true;
     }
 

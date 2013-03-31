@@ -242,7 +242,7 @@ state MOVE:
       -> MOVE_TO_OUTPUT
   'scratchpad'
       -> call cmd_move_scratchpad()
-  direction = 'left', 'right', 'up', 'down', 'parent', 'swapnext', 'swapprev'
+  direction = 'left', 'right', 'up', 'down', 'parent', 'swapnext', 'swapprev', 'intonext', 'intoprev'
       -> MOVE_DIRECTION
   method = 'position'
       -> MOVE_TO_POSITION

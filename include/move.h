@@ -16,6 +16,7 @@
  *
  */
 void tree_swap(bool forward);
+void tree_move_into(bool forward);
 void tree_move_parent();
 void tree_move(int direction);
 
