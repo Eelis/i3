@@ -507,6 +507,40 @@ void tree_render(void) {
     DLOG("-- END RENDERING --\n");
 }
 
+void tree_simple_next(bool forward) {
+
+    Con *con = focused;
+
+    if (con->fullscreen_mode == CF_OUTPUT && con->type != CT_WORKSPACE)
+        con = con_get_workspace(con);
+
+    while (con->type != CT_WORKSPACE && con_num_children(con->parent) == 1)
+        con = con->parent;
+
+    if (con->type == CT_WORKSPACE) {
+        if (con_get_fullscreen_con(con, CF_GLOBAL)) return;
+
+        Con *workspace = forward ? workspace_next_on_output() : workspace_prev_on_output();
+        if (!workspace) return;
+
+        workspace_show(workspace);
+        con_focus(workspace);
+        return;
+    }
+
+    if (con->type == CT_FLOATING_CON) return;
+
+    if (TAILQ_EMPTY(&(con->parent->nodes_head))) return;
+
+    Con *next = forward ? TAILQ_NEXT(con, nodes)
+                        : TAILQ_PREV(con, nodes_head, nodes);
+
+    if (!next) return;
+    if (!con_fullscreen_permits_focusing(next)) return;
+
+    con_focus(next);
+}
+
 /*
  * Recursive function to walk the tree until a con can be found to focus.
  *

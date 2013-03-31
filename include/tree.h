@@ -68,6 +68,7 @@ void tree_close_con(kill_window_t kill_window);
  * (horizontal/vertical).
  *
  */
+void tree_simple_next(bool forward);
 void tree_next(char way, orientation_t orientation);
 
 /**

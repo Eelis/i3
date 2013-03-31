@@ -1342,9 +1342,9 @@ void cmd_focus_direction(I3_CMD, char *direction) {
     else if (strcmp(direction, "down") == 0)
         tree_next('n', VERT);
     else if (strcmp(direction, "prev") == 0)
-        tree_next('p', NO_ORIENTATION);
+        tree_simple_next(false);
     else if (strcmp(direction, "next") == 0)
-        tree_next('n', NO_ORIENTATION);
+        tree_simple_next(true);
     else {
         ELOG("Invalid focus direction (%s)\n", direction);
         ysuccess(false);
