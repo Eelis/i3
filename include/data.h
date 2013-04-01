@@ -436,7 +436,6 @@ struct Assignment {
 };
 
 typedef enum {
-    L_DEFAULT = 0,
     L_STACKED = 1,
     L_TABBED = 2,
     L_DOCKAREA = 3,

@@ -833,11 +833,6 @@ int con_orientation(Con *con) {
         case L_TABBED:
             return HORIZ;
 
-        case L_DEFAULT:
-            DLOG("Someone called con_orientation() on a con with L_DEFAULT, this is a bug in the code.\n");
-            assert(false);
-            return HORIZ;
-
         case L_DOCKAREA:
         case L_OUTPUT:
             DLOG("con_orientation() called on dockarea/output (%d) container %p\n", con->layout, con);
@@ -1204,10 +1199,6 @@ void con_set_layout(Con *con, int const layout) {
     DLOG("con_set_layout(%p, %d), con->type = %d\n",
          con, layout, con->type);
 
-    if (layout == L_DEFAULT) {
-        die("con_set_layout: L_DEFAULT not supported");
-    }
-
     /* Users can focus workspaces, but not any higher in the hierarchy.
      * Focus on the workspace is a special case, since in every other case, the
      * user means "change the layout of the parent split container". */
@@ -1488,9 +1479,7 @@ char *con_get_tree_representation(Con *con) {
 
     char *buf;
     /* 1) add the Layout type to buf */
-    if (con->layout == L_DEFAULT)
-        buf = sstrdup("DEFAULT: ");
-    else if (con->layout == L_SPLITV)
+    if (con->layout == L_SPLITV)
         buf = sstrdup("VSPLIT: ");
     else if (con->layout == L_SPLITH)
         buf = sstrdup("HSPLIT: ");

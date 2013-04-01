@@ -26,7 +26,6 @@ state INITIAL:
   'floating_maximum_size'                  -> FLOATING_MAXIMUM_SIZE_WIDTH
   'floating_modifier'                      -> FLOATING_MODIFIER
   'default_orientation'                    -> DEFAULT_ORIENTATION
-  'workspace_layout'                       -> WORKSPACE_LAYOUT
   windowtype = 'new_window', 'new_float'   -> NEW_WINDOW
   'hide_edge_borders'                      -> HIDE_EDGE_BORDERS
   'for_window'                             -> FOR_WINDOW
@@ -91,11 +90,6 @@ state FLOATING_MODIFIER:
 state DEFAULT_ORIENTATION:
   orientation = 'horizontal', 'vertical', 'auto'
       -> call cfg_default_orientation($orientation)
-
-# workspace_layout <default|stacking|tabbed>
-state WORKSPACE_LAYOUT:
-  layout = 'default', 'stacking', 'stacked', 'tabbed'
-      -> call cfg_workspace_layout($layout)
 
 # new_window <normal|1pixel|none>
 # new_float <normal|1pixel|none>

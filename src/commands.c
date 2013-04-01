@@ -1232,9 +1232,7 @@ bool layout_from_string(char const * layout_str, layout_t * const r) {
     if (strcmp(layout_str, "stacking") == 0)
         layout_str = "stacked";
 
-    if (strcmp(layout_str, "default") == 0)
-        *r = L_DEFAULT;
-    else if (strcmp(layout_str, "stacked") == 0)
+    if (strcmp(layout_str, "stacked") == 0)
         *r = L_STACKED;
     else if (strcmp(layout_str, "tabbed") == 0)
         *r = L_TABBED;

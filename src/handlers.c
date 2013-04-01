@@ -138,11 +138,9 @@ static void handle_enter_notify(xcb_enter_notify_event_t *event) {
         return;
     }
 
-    bool enter_child = false;
     /* Get container by frame or by child window */
     if ((con = con_by_frame_id(event->event)) == NULL) {
         con = con_by_window_id(event->event);
-        enter_child = true;
     }
 
     /* If not, then the user moved his cursor to the root window. In that case, we adjust c_ws */
@@ -155,18 +153,6 @@ static void handle_enter_notify(xcb_enter_notify_event_t *event) {
     if (con->parent->type == CT_DOCKAREA) {
         DLOG("Ignoring, this is a dock client\n");
         return;
-    }
-
-    /* see if the user entered the window on a certain window decoration */
-    int layout = (enter_child ? con->parent->layout : con->layout);
-    if (layout == L_DEFAULT) {
-        Con *child;
-        TAILQ_FOREACH(child, &(con->nodes_head), nodes)
-            if (rect_contains(child->deco_rect, event->event_x, event->event_y)) {
-                LOG("using child %p / %s instead!\n", child, child->name);
-                con = child;
-                break;
-            }
     }
 
 #if 0
@@ -215,31 +201,7 @@ static void handle_motion_notify(xcb_motion_notify_event_t *event) {
     if ((con = con_by_frame_id(event->event)) == NULL) {
         DLOG("MotionNotify for an unknown container, checking if it crosses screen boundaries.\n");
         check_crossing_screen_boundary(event->root_x, event->root_y);
-        return;
     }
-
-    if (config.disable_focus_follows_mouse)
-        return;
-
-    if (con->layout != L_DEFAULT)
-        return;
-
-    /* see over which rect the user is */
-    Con *current;
-    TAILQ_FOREACH(current, &(con->nodes_head), nodes) {
-        if (!rect_contains(current->deco_rect, event->event_x, event->event_y))
-            continue;
-
-        /* We found the rect, let’s see if this window is focused */
-        if (TAILQ_FIRST(&(con->focus_head)) == current)
-            return;
-
-        con_focus(current);
-        x_push_changes(croot);
-        return;
-    }
-
-    return;
 }
 
 /*

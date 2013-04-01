@@ -76,9 +76,9 @@ state BORDER_WIDTH:
   border_width = word
     -> call cmd_border($border_style, $border_width)
 
-# layout default|stacked|stacking|tabbed|splitv|splith
+# layout stacked|stacking|tabbed|splitv|splith
 state LAYOUT:
-  layout_mode = 'default', 'stacked', 'stacking', 'tabbed', 'splitv', 'splith'
+  layout_mode = 'stacked', 'stacking', 'tabbed', 'splitv', 'splith'
       -> call cmd_layout($layout_mode)
 
 # append_layout <path>

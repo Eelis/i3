@@ -76,7 +76,7 @@ Con *workspace_get(const char *num, bool *created) {
         workspace->type = CT_WORKSPACE;
         FREE(workspace->name);
         workspace->name = sstrdup(num);
-        workspace->layout = config.default_layout;
+        workspace->layout = L_STACKED;
         /* We set ->num to the number if this workspace’s name begins with a
          * positive number. Otherwise it’s a named ws and num will be -1. */
         char *endptr = NULL;
@@ -215,7 +215,7 @@ Con *create_workspace_on_output(Output *output, Con *content) {
 
     ws->fullscreen_mode = CF_OUTPUT;
 
-    ws->layout = config.default_layout;
+    ws->layout = L_STACKED;
     _workspace_apply_default_orientation(ws);
 
     return ws;

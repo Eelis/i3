@@ -196,10 +196,6 @@ void dump_node(yajl_gen gen, struct Con *con, bool inplace_restart) {
 
     ystr("layout");
     switch (con->layout) {
-        case L_DEFAULT:
-            DLOG("About to dump layout=default, this is a bug in the code.\n");
-            assert(false);
-            break;
         case L_SPLITV:
             ystr("splitv");
             break;
@@ -217,16 +213,6 @@ void dump_node(yajl_gen gen, struct Con *con, bool inplace_restart) {
             break;
         case L_OUTPUT:
             ystr("output");
-            break;
-    }
-
-    ystr("last_split_layout");
-    switch (con->layout) {
-        case L_SPLITV:
-            ystr("splitv");
-            break;
-        default:
-            ystr("splith");
             break;
     }
 

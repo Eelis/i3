@@ -283,15 +283,6 @@ CFGFUN(default_orientation, const char *orientation) {
     else config.default_orientation = NO_ORIENTATION;
 }
 
-CFGFUN(workspace_layout, const char *layout) {
-    if (strcmp(layout, "default") == 0)
-        config.default_layout = L_DEFAULT;
-    else if (strcmp(layout, "stacking") == 0 ||
-             strcmp(layout, "stacked") == 0)
-        config.default_layout = L_STACKED;
-    else config.default_layout = L_TABBED;
-}
-
 CFGFUN(new_window, const char *windowtype, const char *border, const long width) {
     // FIXME: when using new_float *and* new_window with different border
     // types, this breaks because default_border_width gets overwritten.
