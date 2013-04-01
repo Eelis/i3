@@ -77,19 +77,9 @@ state BORDER_WIDTH:
     -> call cmd_border($border_style, $border_width)
 
 # layout default|stacked|stacking|tabbed|splitv|splith
-# layout toggle [split|all]
 state LAYOUT:
   layout_mode = 'default', 'stacked', 'stacking', 'tabbed', 'splitv', 'splith'
       -> call cmd_layout($layout_mode)
-  'toggle'
-      -> LAYOUT_TOGGLE
-
-# layout toggle [split|all]
-state LAYOUT_TOGGLE:
-  end
-      -> call cmd_layout_toggle($toggle_mode)
-  toggle_mode = 'split', 'all'
-      -> call cmd_layout_toggle($toggle_mode)
 
 # append_layout <path>
 state APPEND_LAYOUT:

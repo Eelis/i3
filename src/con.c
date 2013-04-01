@@ -1200,9 +1200,13 @@ void con_set_border_style(Con *con, int border_style, int border_width) {
  * new split container before).
  *
  */
-void con_set_layout(Con *con, int layout) {
+void con_set_layout(Con *con, int const layout) {
     DLOG("con_set_layout(%p, %d), con->type = %d\n",
          con, layout, con->type);
+
+    if (layout == L_DEFAULT) {
+        die("con_set_layout: L_DEFAULT not supported");
+    }
 
     /* Users can focus workspaces, but not any higher in the hierarchy.
      * Focus on the workspace is a special case, since in every other case, the
@@ -1210,79 +1214,8 @@ void con_set_layout(Con *con, int layout) {
     if (con->type != CT_WORKSPACE)
         con = con->parent;
 
-    /* We fill in last_split_layout when switching to a different layout
-     * since there are many places in the code that don’t use
-     * con_set_layout(). */
-    if (con->layout == L_SPLITH || con->layout == L_SPLITV)
-        con->last_split_layout = con->layout;
-
-    if (layout == L_DEFAULT) {
-        /* Special case: the layout formerly known as "default" (in combination
-         * with an orientation). Since we switched to splith/splitv layouts,
-         * using the "default" layout (which "only" should happen when using
-         * legacy configs) is using the last split layout (either splith or
-         * splitv) in order to still do the same thing.
-         *
-         * Starting from v4.6 though, we will nag users about using "layout
-         * default", and in v4.9 we will remove it entirely (with an
-         * appropriate i3-migrate-config mechanism). */
-        con->layout = con->last_split_layout;
-        /* In case last_split_layout was not initialized… */
-        if (con->layout == L_DEFAULT)
-            con->layout = L_SPLITH;
-    } else {
-        con->layout = layout;
-    }
+    con->layout = layout;
     con_force_split_parents_redraw(con);
-}
-
-/*
- * This function toggles the layout of a given container. toggle_mode can be
- * either 'default' (toggle only between stacked/tabbed/last_split_layout),
- * 'split' (toggle only between splitv/splith) or 'all' (toggle between all
- * layouts).
- *
- */
-void con_toggle_layout(Con *con, const char *toggle_mode) {
-    Con *parent = con;
-    /* Users can focus workspaces, but not any higher in the hierarchy.
-     * Focus on the workspace is a special case, since in every other case, the
-     * user means "change the layout of the parent split container". */
-    if (con->type != CT_WORKSPACE)
-        parent = con->parent;
-    DLOG("con_toggle_layout(%p, %s), parent = %p\n", con, toggle_mode, parent);
-
-    if (strcmp(toggle_mode, "split") == 0) {
-        /* Toggle between splits. When the current layout is not a split
-         * layout, we just switch back to last_split_layout. Otherwise, we
-         * change to the opposite split layout. */
-        if (parent->layout != L_SPLITH && parent->layout != L_SPLITV)
-            con_set_layout(con, parent->last_split_layout);
-        else {
-            if (parent->layout == L_SPLITH)
-                con_set_layout(con, L_SPLITV);
-            else con_set_layout(con, L_SPLITH);
-        }
-    } else {
-        if (parent->layout == L_STACKED)
-            con_set_layout(con, L_TABBED);
-        else if (parent->layout == L_TABBED) {
-            if (strcmp(toggle_mode, "all") == 0)
-                con_set_layout(con, L_SPLITH);
-            else con_set_layout(con, parent->last_split_layout);
-        } else if (parent->layout == L_SPLITH || parent->layout == L_SPLITV) {
-            if (strcmp(toggle_mode, "all") == 0) {
-                /* When toggling through all modes, we toggle between
-                 * splith/splitv, whereas normally we just directly jump to
-                 * stacked. */
-                if (parent->layout == L_SPLITH)
-                    con_set_layout(con, L_SPLITV);
-                else con_set_layout(con, L_STACKED);
-            } else {
-                con_set_layout(con, L_STACKED);
-            }
-        }
-    }
 }
 
 /*

@@ -159,22 +159,6 @@ static int json_string(void *ctx, const unsigned char *val, unsigned int len) {
             json_node->sticky_group = scalloc((len+1) * sizeof(char));
             memcpy(json_node->sticky_group, val, len);
             LOG("sticky_group of this container is %s\n", json_node->sticky_group);
-        } else if (strcasecmp(last_key, "orientation") == 0) {
-            /* Upgrade path from older versions of i3 (doing an inplace restart
-             * to a newer version):
-             * "orientation" is dumped before "layout". Therefore, we store
-             * whether the orientation was horizontal or vertical in the
-             * last_split_layout. When we then encounter layout == "default",
-             * we will use the last_split_layout as layout instead. */
-            char *buf = NULL;
-            sasprintf(&buf, "%.*s", (int)len, val);
-            if (strcasecmp(buf, "none") == 0 ||
-                strcasecmp(buf, "horizontal") == 0)
-                json_node->last_split_layout = L_SPLITH;
-            else if (strcasecmp(buf, "vertical") == 0)
-                json_node->last_split_layout = L_SPLITV;
-            else LOG("Unhandled orientation: %s\n", buf);
-            free(buf);
         } else if (strcasecmp(last_key, "border") == 0) {
             char *buf = NULL;
             sasprintf(&buf, "%.*s", (int)len, val);
@@ -192,9 +176,9 @@ static int json_string(void *ctx, const unsigned char *val, unsigned int len) {
         } else if (strcasecmp(last_key, "layout") == 0) {
             char *buf = NULL;
             sasprintf(&buf, "%.*s", (int)len, val);
-            if (strcasecmp(buf, "default") == 0)
-                /* This set above when we read "orientation". */
-                json_node->layout = json_node->last_split_layout;
+            if (strcasecmp(buf, "default") == 0) {
+                die("json_string: default layout not supported");
+            }
             else if (strcasecmp(buf, "stacked") == 0)
                 json_node->layout = L_STACKED;
             else if (strcasecmp(buf, "tabbed") == 0)
@@ -208,15 +192,6 @@ static int json_string(void *ctx, const unsigned char *val, unsigned int len) {
             else if (strcasecmp(buf, "splitv") == 0)
                 json_node->layout = L_SPLITV;
             else LOG("Unhandled \"layout\": %s\n", buf);
-            free(buf);
-        } else if (strcasecmp(last_key, "last_split_layout") == 0) {
-            char *buf = NULL;
-            sasprintf(&buf, "%.*s", (int)len, val);
-            if (strcasecmp(buf, "splith") == 0)
-                json_node->last_split_layout = L_SPLITH;
-            else if (strcasecmp(buf, "splitv") == 0)
-                json_node->last_split_layout = L_SPLITV;
-            else LOG("Unhandled \"last_splitlayout\": %s\n", buf);
             free(buf);
         } else if (strcasecmp(last_key, "mark") == 0) {
             char *buf = NULL;

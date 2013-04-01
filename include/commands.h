@@ -200,12 +200,6 @@ void cmd_move_direction(I3_CMD, char *direction, char *move_px);
 void cmd_layout(I3_CMD, char *layout_str);
 
 /**
- * Implementation of 'layout toggle [all|split]'.
- *
- */
-void cmd_layout_toggle(I3_CMD, char *toggle_mode);
-
-/**
  * Implementation of 'exit'.
  *
  */

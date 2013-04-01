@@ -1586,33 +1586,6 @@ void cmd_layout(I3_CMD, char *layout_str) {
 }
 
 /*
- * Implementation of 'layout toggle [all|split]'.
- *
- */
-void cmd_layout_toggle(I3_CMD, char *toggle_mode) {
-    owindow *current;
-
-    if (toggle_mode == NULL)
-        toggle_mode = "default";
-
-    DLOG("toggling layout (mode = %s)\n", toggle_mode);
-
-    /* check if the match is empty, not if the result is empty */
-    if (match_is_empty(current_match))
-        con_toggle_layout(focused, toggle_mode);
-    else {
-        TAILQ_FOREACH(current, &owindows, owindows) {
-            DLOG("matching: %p / %s\n", current->con, current->con->name);
-            con_toggle_layout(current->con, toggle_mode);
-        }
-    }
-
-    cmd_output->needs_tree_render = true;
-    // XXX: default reply for now, make this a better reply
-    ysuccess(true);
-}
-
-/*
  * Implementation of 'exit'.
  *
  */

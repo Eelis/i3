@@ -534,7 +534,7 @@ struct Con {
      * last_split_layout is one of splitv or splith to support the old "layout
      * default" command which by now should be "layout splitv" or "layout
      * splith" explicitly. */
-    layout_t layout, last_split_layout;
+    layout_t layout;
     border_style_t border_style;
     /** floating? (= not in tiling layout) This cannot be simply a bool
      * because we want to keep track of whether the status was set by the
