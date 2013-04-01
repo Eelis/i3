@@ -36,7 +36,7 @@ Con *tree_open_con(Con *con, i3Window *window);
  * container which contains the old one and the future ones.
  *
  */
-void tree_split(Con *con, layout_t layout);
+Con *tree_split(Con *con, layout_t layout);
 
 /**
  * Moves focus one level up. Returns true if focus changed.

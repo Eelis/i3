@@ -372,17 +372,17 @@ void tree_close_con(kill_window_t kill_window) {
  * container which contains the old one and the future ones.
  *
  */
-void tree_split(Con *con, layout_t layout) {
+Con *tree_split(Con *con, layout_t layout) {
     if (con->type == CT_FLOATING_CON) {
         DLOG("Floating containers can't be split.\n");
-        return;
+        return 0;
     }
 
     if (con->type == CT_WORKSPACE) {
         if (con_num_children(con) < 2) {
             DLOG("Just changing orientation of workspace\n");
             con->layout = layout;
-            return;
+            return con;
         } else {
             /* if there is more than one container on the workspace
              * move them into a new container and handle this instead */
@@ -402,7 +402,7 @@ void tree_split(Con *con, layout_t layout) {
     if (con_num_children(parent) == 1) {
         parent->layout = layout;
         DLOG("Just changing orientation of existing container\n");
-        return;
+        return parent;
     }
 
     DLOG("Splitting in layout %d\n", layout);
@@ -420,6 +420,8 @@ void tree_split(Con *con, layout_t layout) {
 
     /* 4: add it as a child to the new Con */
     con_attach(con, new, false);
+
+    return new;
 }
 
 /*

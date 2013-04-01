@@ -145,7 +145,7 @@ void tree_swap(bool forward) {
 
 void tree_move_into(bool forward) {
 
-    Con *con = focused;
+    Con * const con = focused;
 
     if (con->type == CT_WORKSPACE) {
         DLOG("Not moving workspace\n");
@@ -166,8 +166,18 @@ void tree_move_into(bool forward) {
     Con *next = forward ? TAILQ_NEXT(con, nodes)
                         : TAILQ_PREV(con, nodes_head, nodes);
 
-    if (next && !con_is_leaf(next))
-        push_con_back(con, next);
+    if (!next) return;
+
+    if (con_is_leaf(next)) {
+        /* Returning without doing anything would be a perfectly valid thing to
+         * do in this case, but since wanting to merge siblings is a common
+         * use case, we might as well automatically create the split. */
+        next = tree_split(next, con->parent->layout == L_STACKED ? L_TABBED : L_STACKED);
+    }
+
+    if (!next) return;
+
+    push_con_back(con, next);
 
     /* We need to call con_focus() to fix the focus stack "above" the container
      * we just inserted the focused container into (otherwise, the parent
