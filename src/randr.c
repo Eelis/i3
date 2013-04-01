@@ -484,26 +484,6 @@ static void output_change_mode(xcb_connection_t *conn, Output *output) {
             floating_fix_coordinates(child, &(workspace->rect), &(output->con->rect));
         }
     }
-
-    /* If default_orientation is NO_ORIENTATION, we change the orientation of
-     * the workspaces and their childs depending on output resolution. This is
-     * only done for workspaces with maximum one child. */
-    if (config.default_orientation == NO_ORIENTATION) {
-        TAILQ_FOREACH(workspace, &(content->nodes_head), nodes) {
-            /* Workspaces with more than one child are left untouched because
-             * we do not want to change an existing layout. */
-            if (con_num_children(workspace) > 1)
-                continue;
-
-            workspace->layout = (output->rect.height > output->rect.width) ? L_SPLITV : L_SPLITH;
-            DLOG("Setting workspace [%d,%s]'s layout to %d.\n", workspace->num, workspace->name, workspace->layout);
-            if ((child = TAILQ_FIRST(&(workspace->nodes_head)))) {
-                if (child->layout == L_SPLITV || child->layout == L_SPLITH)
-                    child->layout = workspace->layout;
-                DLOG("Setting child [%d,%s]'s layout to %d.\n", child->num, child->name, child->layout);
-            }
-        }
-    }
 }
 
 /*

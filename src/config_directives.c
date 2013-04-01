@@ -275,14 +275,6 @@ CFGFUN(floating_modifier, const char *modifiers) {
     config.floating_modifier = modifiers_from_str(modifiers);
 }
 
-CFGFUN(default_orientation, const char *orientation) {
-    if (strcmp(orientation, "horizontal") == 0)
-        config.default_orientation = HORIZ;
-    else if (strcmp(orientation, "vertical") == 0)
-        config.default_orientation = VERT;
-    else config.default_orientation = NO_ORIENTATION;
-}
-
 CFGFUN(new_window, const char *windowtype, const char *border, const long width) {
     // FIXME: when using new_float *and* new_window with different border
     // types, this breaks because default_border_width gets overwritten.

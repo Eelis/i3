@@ -99,9 +99,6 @@ struct Config {
     int container_stack_limit_value;
     int default_border_width;
 
-    /** Default orientation for new containers */
-    int default_orientation;
-
     /** By default, focus follows mouse. If the user explicitly wants to
      * turn this off (and instead rely only on the keyboard for changing
      * focus), we allow him to do this with this relatively special option.

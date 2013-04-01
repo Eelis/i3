@@ -25,7 +25,6 @@ state INITIAL:
   'floating_minimum_size'                  -> FLOATING_MINIMUM_SIZE_WIDTH
   'floating_maximum_size'                  -> FLOATING_MAXIMUM_SIZE_WIDTH
   'floating_modifier'                      -> FLOATING_MODIFIER
-  'default_orientation'                    -> DEFAULT_ORIENTATION
   windowtype = 'new_window', 'new_float'   -> NEW_WINDOW
   'hide_edge_borders'                      -> HIDE_EDGE_BORDERS
   'for_window'                             -> FOR_WINDOW
@@ -85,11 +84,6 @@ state FLOATING_MODIFIER:
       ->
   end
       -> call cfg_floating_modifier($modifiers)
-
-# default_orientation <horizontal|vertical|auto>
-state DEFAULT_ORIENTATION:
-  orientation = 'horizontal', 'vertical', 'auto'
-      -> call cfg_default_orientation($orientation)
 
 # new_window <normal|1pixel|none>
 # new_float <normal|1pixel|none>

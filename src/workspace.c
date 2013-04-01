@@ -20,25 +20,6 @@
 static char *previous_workspace_name = NULL;
 
 /*
- * Sets ws->layout to splith/splitv if default_orientation was specified in the
- * configfile. Otherwise, it uses splith/splitv depending on whether the output
- * is higher than wide.
- *
- */
-static void _workspace_apply_default_orientation(Con *ws) {
-    /* If default_orientation is set to NO_ORIENTATION we determine
-     * orientation depending on output resolution. */
-    if (config.default_orientation == NO_ORIENTATION) {
-        Con *output = con_get_output(ws);
-        ws->layout = (output->rect.height > output->rect.width) ? L_SPLITV : L_SPLITH;
-        DLOG("Auto orientation. Workspace size set to (%d,%d), setting layout to %d.\n",
-             output->rect.width, output->rect.height, ws->layout);
-    } else {
-        ws->layout = (config.default_orientation == HORIZ) ? L_SPLITH : L_SPLITV;
-    }
-}
-
-/*
  * Returns a pointer to the workspace with the given number (starting at 0),
  * creating the workspace if necessary (by allocating the necessary amount of
  * memory and initializing the data structures correctly).
@@ -90,7 +71,6 @@ Con *workspace_get(const char *num, bool *created) {
         LOG("num = %d\n", workspace->num);
 
         workspace->parent = content;
-        _workspace_apply_default_orientation(workspace);
 
         con_attach(workspace, content, false);
 
@@ -216,7 +196,6 @@ Con *create_workspace_on_output(Output *output, Con *content) {
     ws->fullscreen_mode = CF_OUTPUT;
 
     ws->layout = L_STACKED;
-    _workspace_apply_default_orientation(ws);
 
     return ws;
 }
