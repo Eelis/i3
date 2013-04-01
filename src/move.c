@@ -143,28 +143,37 @@ void tree_swap(bool forward) {
     DLOG("Swapped.\n");
 }
 
-void tree_move_into(bool forward) {
+Con * ascend_mono_splits(Con * const con) {
+    return
+        (con->type != CT_WORKSPACE
+            && con_num_children(con->parent) == 1)
+        ? ascend_mono_splits(con->parent)
+        : con;
+}
 
-    Con * const con = focused;
+Con * descend_mono_splits(Con * const con) {
+    return con_num_children(con) == 1
+        ? descend_mono_splits(TAILQ_FIRST(&con->nodes_head))
+        : con;
+}
 
-    if (con->type == CT_WORKSPACE) {
-        DLOG("Not moving workspace\n");
-        return;
-    }
+void tree_move_into(bool const forward) {
 
-    if (con->parent->type == CT_WORKSPACE && con_num_children(con->parent) == 1) {
-        DLOG("This is the only con on this workspace, not doing anything\n");
+    Con * const big = ascend_mono_splits(focused);
+
+    if (big->type == CT_WORKSPACE) {
+        DLOG("Sorry, not implemented yet: moving workspace into siblings\n");
         return;
     }
 
     /* Enforce the fullscreen focus restrictions. */
-    if (!con_fullscreen_permits_focusing(con->parent)) {
+    if (!con_fullscreen_permits_focusing(big->parent)) {
         LOG("Cannot move out of fullscreen container\n");
         return;
     }
 
-    Con *next = forward ? TAILQ_NEXT(con, nodes)
-                        : TAILQ_PREV(con, nodes_head, nodes);
+    Con *next = forward ? TAILQ_NEXT(big, nodes)
+                        : TAILQ_PREV(big, nodes_head, nodes);
 
     if (!next) return;
 
@@ -172,20 +181,21 @@ void tree_move_into(bool forward) {
         /* Returning without doing anything would be a perfectly valid thing to
          * do in this case, but since wanting to merge siblings is a common
          * use case, we might as well automatically create the split. */
-        next = tree_split(next, con->parent->layout == L_STACKED ? L_TABBED : L_STACKED);
+        next = tree_split(next, big->parent->layout == L_STACKED ? L_TABBED : L_STACKED);
     }
 
-    if (!next) return;
+    Con * const small = descend_mono_splits(focused);
+        // we don't want to take mono splits with us
 
-    push_con_back(con, next);
+    push_con_back(small, next);
 
     /* We need to call con_focus() to fix the focus stack "above" the container
      * we just inserted the focused container into (otherwise, the parent
      * container(s) would still point to the old container(s)). */
-    con_focus(con);
+    con_focus(small);
 
     /* force re-painting the indicators */
-    FREE(con->deco_render_params);
+    FREE(small->deco_render_params);
 
     tree_flatten(croot);
 }
