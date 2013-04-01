@@ -533,14 +533,7 @@ struct Con {
      *
      * last_split_layout is one of splitv or splith to support the old "layout
      * default" command which by now should be "layout splitv" or "layout
-     * splith" explicitly.
-     *
-     * workspace_layout is only for type == CT_WORKSPACE cons. When you change
-     * the layout of a workspace without any children, i3 cannot just set the
-     * layout (because workspaces need to be splitv/splith to allow focus
-     * parent and opening new containers). Instead, it stores the requested
-     * layout in workspace_layout and creates a new split container with that
-     * layout whenever a new container is attached to the workspace. */
+     * splith" explicitly. */
     layout_t layout, last_split_layout;
     border_style_t border_style;
     /** floating? (= not in tiling layout) This cannot be simply a bool
