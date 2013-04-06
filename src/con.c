@@ -233,7 +233,7 @@ void con_focus(Con *con) {
  * Returns true when this node is a leaf node (has no children)
  *
  */
-bool con_is_leaf(Con *con) {
+bool con_is_leaf(Con const *con) {
     return TAILQ_EMPTY(&(con->nodes_head));
 }
 
@@ -241,7 +241,7 @@ bool con_is_leaf(Con *con) {
  * Returns true if this node has regular or floating children.
  *
  */
-bool con_has_children(Con *con) {
+bool con_has_children(Con const *con) {
     return (!con_is_leaf(con) || !TAILQ_EMPTY(&(con->floating_head)));
 }
 
@@ -249,7 +249,7 @@ bool con_has_children(Con *con) {
  * Returns true if a container should be considered split.
  *
  */
-bool con_is_split(Con *con) {
+bool con_is_split(Con const *con) {
     if (con_is_leaf(con))
         return false;
 
@@ -432,7 +432,7 @@ Con *con_inside_floating(Con *con) {
  * Checks if the given container is inside a focused container.
  *
  */
-bool con_inside_focused(Con *con) {
+bool con_inside_focused(Con const *con) {
     if (con == focused)
         return true;
     if (!con->parent)
@@ -510,7 +510,7 @@ Con *con_for_window(Con *con, i3Window *window, Match **store_match) {
  * Returns the number of children of this container.
  *
  */
-int con_num_children(Con *con) {
+int con_num_children(Con const *con) {
     Con *child;
     int children = 0;
 
@@ -1456,7 +1456,7 @@ void con_set_urgency(Con *con, bool urgent) {
  * Create a string representing the subtree under con.
  *
  */
-char *con_get_tree_representation(Con *con) {
+char *con_get_tree_representation(Con const *con) {
     /* this code works as follows:
      *  1) create a string with the layout type (D/V/H/T/S) and an opening bracket
      *  2) append the tree representation of the children to the string

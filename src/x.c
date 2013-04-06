@@ -294,11 +294,25 @@ void x_window_kill(xcb_window_t window, kill_window_t kill_window) {
     free(event);
 }
 
+void draw_titlebar(xcb_gcontext_t, xcb_pixmap_t, Con const *, Rect);
+
+struct Colortriple * color_for_con(Con const * con) {
+    if (con->urgent)
+        return &config.client.urgent;
+    else if (con == focused || con_inside_focused(con))
+        return &config.client.focused;
+    else if (con == TAILQ_FIRST(&(con->parent->focus_head)))
+        return &config.client.focused_inactive;
+    else
+        return &config.client.unfocused;
+}
+
 /*
  * Draws the decoration of the given container onto its parent.
  *
  */
 void x_draw_decoration(Con *con) {
+
     Con *parent = con->parent;
     bool leaf = con_is_leaf(con);
 
@@ -331,15 +345,7 @@ void x_draw_decoration(Con *con) {
     /* 1: build deco_params and compare with cache */
     struct deco_render_params *p = scalloc(sizeof(struct deco_render_params));
 
-    /* find out which colors to use */
-    if (con->urgent)
-        p->color = &config.client.urgent;
-    else if (con == focused || con_inside_focused(con))
-        p->color = &config.client.focused;
-    else if (con == TAILQ_FIRST(&(parent->focus_head)))
-        p->color = &config.client.focused_inactive;
-    else
-        p->color = &config.client.unfocused;
+    p->color = color_for_con(con);
 
     p->border_style = con_border_style(con);
 
@@ -351,7 +357,7 @@ void x_draw_decoration(Con *con) {
     p->background = config.client.background;
     p->con_is_leaf = con_is_leaf(con);
     p->parent_orientation = con_orientation(parent);
-
+/*
     if (con->deco_render_params != NULL &&
         (con->window == NULL || !con->window->name_x_changed) &&
         !parent->pixmap_recreated &&
@@ -360,6 +366,10 @@ void x_draw_decoration(Con *con) {
         free(p);
         goto copy_pixmaps;
     }
+
+    TODO: This optimization is currently commented out because the title bars of
+          tabs nested in stacks don't get redrawn properly.
+*/
 
     Con *next = con;
     while ((next = TAILQ_NEXT(next, nodes))) {
@@ -460,77 +470,103 @@ void x_draw_decoration(Con *con) {
     if (p->border_style != BS_NORMAL)
         goto copy_pixmaps;
 
+    draw_titlebar(parent->pm_gc, parent->pixmap, con, con->deco_rect);
+
+copy_pixmaps:
+
+    xcb_copy_area(conn, con->pixmap, con->frame, con->pm_gc, 0, 0, 0, 0, con->rect.width, con->rect.height);
+}
+
+void draw_titlebar(xcb_gcontext_t const pm_gc, xcb_pixmap_t const pixmap, Con const * con, Rect const dr) {
+
+    struct Colortriple * color = color_for_con(con);
+
     /* 4: paint the bar */
-    xcb_change_gc(conn, parent->pm_gc, XCB_GC_FOREGROUND, (uint32_t[]){ p->color->background });
-    xcb_rectangle_t drect = { con->deco_rect.x, con->deco_rect.y, con->deco_rect.width, con->deco_rect.height };
-    xcb_poly_fill_rectangle(conn, parent->pixmap, parent->pm_gc, 1, &drect);
+    xcb_change_gc(conn, pm_gc, XCB_GC_FOREGROUND, (uint32_t[]){ color->background });
+    xcb_rectangle_t drect = { con->deco_rect.x, dr.y, con->deco_rect.width, dr.height };
+    xcb_poly_fill_rectangle(conn, pixmap, pm_gc, 1, &drect);
 
     /* 5: draw two unconnected horizontal lines in border color */
-    xcb_change_gc(conn, parent->pm_gc, XCB_GC_FOREGROUND, (uint32_t[]){ p->color->border });
-    Rect *dr = &(con->deco_rect);
+    xcb_change_gc(conn, pm_gc, XCB_GC_FOREGROUND, (uint32_t[]){ color->border });
     int deco_diff_l = 2;
     int deco_diff_r = 2;
-    if (parent->layout == L_TABBED) {
+
+    if (con->parent->layout == L_TABBED) {
         if (TAILQ_PREV(con, nodes_head, nodes) != NULL)
             deco_diff_l = 0;
         if (TAILQ_NEXT(con, nodes) != NULL)
             deco_diff_r = 0;
     }
-    xcb_segment_t segments[] = {
-        { dr->x,                 dr->y,
-          dr->x + dr->width - 1, dr->y },
 
-        { dr->x + deco_diff_l,                 dr->y + dr->height - 1,
-          dr->x - deco_diff_r + dr->width - 1, dr->y + dr->height - 1 }
+    xcb_segment_t segments[] = {
+        { dr.x,                 dr.y,
+          dr.x + dr.width - 1, dr.y },
+
+        { dr.x + deco_diff_l,                dr.y + dr.height - 1,
+          dr.x - deco_diff_r + dr.width - 1, dr.y + dr.height - 1 }
     };
-    xcb_poly_segment(conn, parent->pixmap, parent->pm_gc, 2, segments);
+    xcb_poly_segment(conn, pixmap, pm_gc, 2, segments);
 
     /* 6: draw the title */
-    set_font_colors(parent->pm_gc, p->color->text, p->color->background);
-    int text_offset_y = (con->deco_rect.height - config.font.height) / 2;
+    set_font_colors(pm_gc, color->text, color->background);
+    int text_offset_y = (dr.height - config.font.height) / 2;
 
     struct Window *win = con->window;
     if (win == NULL) {
         /* we have a split container which gets a representation
          * of its children as title
          */
-        char *title = con_get_tree_representation(con);
+        if (con->parent->layout == L_STACKED && con->layout == L_TABBED)
+        {
+            Con * child;
+            TAILQ_FOREACH(child, &(con->nodes_head), nodes)
+            {
+                //assert(dr.x == 0);
+                Rect const where = {
+                    child->deco_rect.x + dr.x,
+                    child->deco_rect.y + dr.y, // should really both be 0, no?
+                    child->deco_rect.width,
+                    child->deco_rect.height }; // todo: add some assertions
 
-        draw_text_ascii(title,
-                parent->pixmap, parent->pm_gc,
-                con->deco_rect.x + 2, con->deco_rect.y + text_offset_y,
-                con->deco_rect.width - 2);
-        free(title);
-
-        goto after_title;
-    }
-
-    if (win->name == NULL)
-        goto copy_pixmaps;
-
-    int indent_level = 0,
-        indent_mult = 0;
-    Con *il_parent = parent;
-    if (il_parent->layout != L_STACKED) {
-        while (1) {
-            //DLOG("il_parent = %p, layout = %d\n", il_parent, il_parent->layout);
-            if (il_parent->layout == L_STACKED)
-                indent_level++;
-            if (il_parent->type == CT_WORKSPACE || il_parent->type == CT_DOCKAREA || il_parent->type == CT_OUTPUT)
-                break;
-            il_parent = il_parent->parent;
-            indent_mult++;
+                draw_titlebar(pm_gc, pixmap, child, where);
+            }
         }
+        else
+        {
+            char *title = con_get_tree_representation(con);
+            draw_text_ascii(title, pixmap, pm_gc,
+                dr.x + 2, dr.y + text_offset_y, dr.width - 2);
+            free(title);
+        }
+
+    } else {
+
+        if (win->name == NULL) return;
+
+        int indent_level = 0,
+            indent_mult = 0;
+
+        Con const *il_parent = con->parent;
+        if (il_parent->layout != L_STACKED) {
+            while (1) {
+                //DLOG("il_parent = %p, layout = %d\n", il_parent, il_parent->layout);
+                if (il_parent->layout == L_STACKED)
+                    indent_level++;
+                if (il_parent->type == CT_WORKSPACE || il_parent->type == CT_DOCKAREA || il_parent->type == CT_OUTPUT)
+                    break;
+                il_parent = il_parent->parent;
+                indent_mult++;
+            }
+        }
+
+        //DLOG("indent_level = %d, indent_mult = %d\n", indent_level, indent_mult);
+        int const indent_px = (indent_level * 5) * indent_mult;
+
+        draw_text(win->name, pixmap, pm_gc,
+            dr.x + 2 + indent_px, dr.y + text_offset_y,
+            dr.width - 2 - indent_px);
     }
-    //DLOG("indent_level = %d, indent_mult = %d\n", indent_level, indent_mult);
-    int indent_px = (indent_level * 5) * indent_mult;
 
-    draw_text(win->name,
-            parent->pixmap, parent->pm_gc,
-            con->deco_rect.x + 2 + indent_px, con->deco_rect.y + text_offset_y,
-            con->deco_rect.width - 2 - indent_px);
-
-after_title:
     /* Since we don’t clip the text at all, it might in some cases be painted
      * on the border pixels on the right side of a window. Therefore, we draw
      * the right border again after rendering the text (and the unconnected
@@ -538,26 +574,24 @@ after_title:
 
     /* Draw a 1px separator line before and after every tab, so that tabs can
      * be easily distinguished. */
-    if (parent->layout == L_TABBED) {
-        xcb_change_gc(conn, parent->pm_gc, XCB_GC_FOREGROUND, (uint32_t[]){ p->color->border });
+
+    if (con->parent->layout == L_TABBED) {
+        xcb_change_gc(conn, pm_gc, XCB_GC_FOREGROUND, (uint32_t[]){ color->border });
     } else {
-        xcb_change_gc(conn, parent->pm_gc, XCB_GC_FOREGROUND, (uint32_t[]){ p->color->background });
+        xcb_change_gc(conn, pm_gc, XCB_GC_FOREGROUND, (uint32_t[]){ color->background });
     }
-    xcb_poly_line(conn, XCB_COORD_MODE_ORIGIN, parent->pixmap, parent->pm_gc, 6,
+    xcb_poly_line(conn, XCB_COORD_MODE_ORIGIN, pixmap, pm_gc, 6,
                   (xcb_point_t[]){
-                      { dr->x + dr->width, dr->y },
-                      { dr->x + dr->width, dr->y + dr->height },
-                      { dr->x + dr->width - 1, dr->y },
-                      { dr->x + dr->width - 1, dr->y + dr->height },
-                      { dr->x, dr->y + dr->height },
-                      { dr->x, dr->y },
+                      { dr.x + dr.width, dr.y },
+                      { dr.x + dr.width, dr.y + dr.height },
+                      { dr.x + dr.width - 1, dr.y },
+                      { dr.x + dr.width - 1, dr.y + dr.height },
+                      { dr.x, dr.y + dr.height },
+                      { dr.x, dr.y },
                   });
 
-    xcb_change_gc(conn, parent->pm_gc, XCB_GC_FOREGROUND, (uint32_t[]){ p->color->border });
-    xcb_poly_segment(conn, parent->pixmap, parent->pm_gc, 2, segments);
-
-copy_pixmaps:
-    xcb_copy_area(conn, con->pixmap, con->frame, con->pm_gc, 0, 0, 0, 0, con->rect.width, con->rect.height);
+    xcb_change_gc(conn, pm_gc, XCB_GC_FOREGROUND, (uint32_t[]){ color->border });
+    xcb_poly_segment(conn, pixmap, pm_gc, 2, segments);
 }
 
 /*
@@ -622,6 +656,7 @@ void x_push_node(Con *con) {
             }
         }
         rect.height = max_y + max_height;
+        if (con->layout == L_TABBED && con->parent->layout == L_STACKED) rect.height = 0;
         if (rect.height == 0)
             con->mapped = false;
     }

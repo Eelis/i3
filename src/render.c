@@ -377,8 +377,10 @@ void render_con(Con *con, bool render_fullscreen) {
             child->deco_rect.y = y - con->rect.y;
 
             if (children > 1 || (child->border_style != BS_PIXEL && child->border_style != BS_NONE)) {
-                child->rect.y += deco_height;
-                child->rect.height -= deco_height;
+                if (con->parent->layout != L_STACKED) {
+                    child->rect.y += deco_height;
+                    child->rect.height -= deco_height;
+                }
                 child->deco_rect.height = deco_height;
             } else {
                 child->deco_rect.height = (child->border_style == BS_PIXEL ? 1 : 0);

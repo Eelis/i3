@@ -36,19 +36,19 @@ void con_focus(Con *con);
  * Returns true when this node is a leaf node (has no children)
  *
  */
-bool con_is_leaf(Con *con);
+bool con_is_leaf(Con const *con);
 
 /*
  * Returns true if a container should be considered split.
  *
  */
-bool con_is_split(Con *con);
+bool con_is_split(Con const *con);
 
 /**
  * Returns true if this node has regular or floating children.
  *
  */
-bool con_has_children(Con *con);
+bool con_has_children(Con const *con);
 
 /**
  * Returns true if this node accepts a window (if the node swallows windows,
@@ -106,7 +106,7 @@ Con *con_inside_floating(Con *con);
  * Checks if the given container is inside a focused container.
  *
  */
-bool con_inside_focused(Con *con);
+bool con_inside_focused(Con const *con);
 
 /**
  * Returns the container with the given client window ID or NULL if no such
@@ -133,7 +133,7 @@ Con *con_for_window(Con *con, i3Window *window, Match **store_match);
  * Returns the number of children of this container.
  *
  */
-int con_num_children(Con *con);
+int con_num_children(Con const *con);
 
 /**
  * Attaches the given container to the given parent. This happens when moving
@@ -330,6 +330,6 @@ void con_set_urgency(Con *con, bool urgent);
  * Create a string representing the subtree under con.
  *
  */
-char *con_get_tree_representation(Con *con);
+char *con_get_tree_representation(Con const *con);
 
 #endif
