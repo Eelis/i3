@@ -1199,12 +1199,6 @@ void con_set_layout(Con *con, int const layout) {
     DLOG("con_set_layout(%p, %d), con->type = %d\n",
          con, layout, con->type);
 
-    /* Users can focus workspaces, but not any higher in the hierarchy.
-     * Focus on the workspace is a special case, since in every other case, the
-     * user means "change the layout of the parent split container". */
-    if (con->type != CT_WORKSPACE)
-        con = con->parent;
-
     con->layout = layout;
     con_force_split_parents_redraw(con);
 }
