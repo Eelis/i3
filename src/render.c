@@ -333,8 +333,10 @@ void render_con(Con *con, bool render_fullscreen) {
                     child->deco_rect.x = child->rect.x - con->rect.x;
                     child->deco_rect.y = child->rect.y - con->rect.y;
 
-                    child->rect.y += deco_height;
-                    child->rect.height -= deco_height;
+                    if (!(con->layout == L_SPLITH && con->parent->layout == L_STACKED)) {
+                        child->rect.y += deco_height;
+                        child->rect.height -= deco_height;
+                    }
 
                     child->deco_rect.width = child->rect.width;
                     child->deco_rect.height = deco_height;
@@ -344,6 +346,11 @@ void render_con(Con *con, bool render_fullscreen) {
                     child->deco_rect.width = 0;
                     child->deco_rect.height = 0;
                 }
+            } else {
+                child->deco_rect.width = ceil((float)rect.width / children);
+                child->deco_rect.x = i * child->deco_rect.width;
+                child->deco_rect.y = 0;
+                child->deco_rect.height = deco_height;
             }
         }
 
@@ -372,7 +379,7 @@ void render_con(Con *con, bool render_fullscreen) {
             child->rect.width = rect.width;
             child->rect.height = rect.height;
 
-            child->deco_rect.width = ceil((float)child->rect.width / children);
+            child->deco_rect.width = ceil((float)rect.width / children);
             child->deco_rect.x = x - con->rect.x + i * child->deco_rect.width;
             child->deco_rect.y = y - con->rect.y;
 

@@ -516,7 +516,7 @@ void draw_titlebar(xcb_gcontext_t const pm_gc, xcb_pixmap_t const pixmap, Con co
         /* we have a split container which gets a representation
          * of its children as title
          */
-        if (con->parent->layout == L_STACKED && con->layout == L_TABBED)
+        if (con->parent->layout == L_STACKED && (con->layout == L_TABBED || con->layout == L_SPLITH))
         {
             Con * child;
             TAILQ_FOREACH(child, &(con->nodes_head), nodes)
@@ -656,7 +656,9 @@ void x_push_node(Con *con) {
             }
         }
         rect.height = max_y + max_height;
-        if (con->layout == L_TABBED && con->parent->layout == L_STACKED) rect.height = 0;
+        if (con->parent->layout == L_STACKED &&
+            (con->layout == L_TABBED || con->layout == L_SPLITH))
+            rect.height = 0;
         if (rect.height == 0)
             con->mapped = false;
     }
