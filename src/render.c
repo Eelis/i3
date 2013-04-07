@@ -444,6 +444,7 @@ void render_con(Con *con, bool render_fullscreen) {
 }
 
 bool deco_drawn_by_parent(Con const * con) {
+  if (!con->parent) return false;
   return (con->parent->layout == L_STACKED && (con->layout == L_TABBED || con->layout == L_SPLITH)) ||
          (con->parent->layout == L_SPLITH && deco_drawn_by_parent(con->parent));
 }
