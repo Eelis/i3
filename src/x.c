@@ -483,7 +483,7 @@ void draw_titlebar(xcb_gcontext_t const pm_gc, xcb_pixmap_t const pixmap, Con co
 
     /* 4: paint the bar */
     xcb_change_gc(conn, pm_gc, XCB_GC_FOREGROUND, (uint32_t[]){ color->background });
-    xcb_rectangle_t drect = { con->deco_rect.x, dr.y, con->deco_rect.width, dr.height };
+    xcb_rectangle_t drect = { dr.x, dr.y, dr.width, dr.height };
     xcb_poly_fill_rectangle(conn, pixmap, pm_gc, 1, &drect);
 
     /* 5: draw two unconnected horizontal lines in border color */
@@ -513,20 +513,16 @@ void draw_titlebar(xcb_gcontext_t const pm_gc, xcb_pixmap_t const pixmap, Con co
 
     struct Window *win = con->window;
     if (win == NULL) {
-        /* we have a split container which gets a representation
-         * of its children as title
-         */
-        if (con->parent->layout == L_STACKED && (con->layout == L_TABBED || con->layout == L_SPLITH))
-        {
+        if ((con->layout == L_TABBED || con->layout == L_SPLITH) &&
+            (con->parent->layout == L_SPLITH || con->parent->layout == L_STACKED)) {
             Con * child;
             TAILQ_FOREACH(child, &(con->nodes_head), nodes)
             {
-                //assert(dr.x == 0);
                 Rect const where = {
                     child->deco_rect.x + dr.x,
-                    child->deco_rect.y + dr.y, // should really both be 0, no?
+                    child->deco_rect.y + dr.y,
                     child->deco_rect.width,
-                    child->deco_rect.height }; // todo: add some assertions
+                    child->deco_rect.height };
 
                 draw_titlebar(pm_gc, pixmap, child, where);
             }
@@ -656,7 +652,7 @@ void x_push_node(Con *con) {
             }
         }
         rect.height = max_y + max_height;
-        if (con->parent->layout == L_STACKED &&
+        if ((con->parent->layout == L_STACKED || con->parent->layout == L_SPLITH) &&
             (con->layout == L_TABBED || con->layout == L_SPLITH))
             rect.height = 0;
         if (rect.height == 0)
