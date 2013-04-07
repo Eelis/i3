@@ -92,10 +92,37 @@ static void attach_to_workspace(Con *con, Con *ws) {
     con_fix_percent(ws);
 }
 
+Con *create_workspace_after(Con * w) {
+    static int i = 0;
+    Con * const content = w->parent,
+        * const workspace = con_new(NULL, NULL);
+    char *name;
+    sasprintf(&name, "[i3 con] anonymous workspace %d", i);
+    x_set_name(workspace, name);
+    free(name);
+    workspace->type = CT_WORKSPACE;
+    FREE(workspace->name);
+    sasprintf(&workspace->name, "_%d", i);
+    workspace->layout = L_STACKED;
+    workspace->num = -1;
+    workspace->parent = content;
+    TAILQ_INSERT_AFTER(&content->nodes_head, w, workspace, nodes);
+    TAILQ_INSERT_TAIL(&content->focus_head, workspace, focused);
+    con_force_split_parents_redraw(workspace);
+    ++i;
+    return workspace;
+}
+
 void tree_move_parent(bool forward) {
     Con *con = focused;
 
-    if (con->type == CT_WORKSPACE || con->parent->type == CT_WORKSPACE) {
+    if (con->type == CT_WORKSPACE) return;
+
+    if (con->parent->type == CT_WORKSPACE) {
+        Con *workspace = create_workspace_after(con->parent);
+        con_move_to_workspace(con, workspace, true, false);
+        workspace_show(workspace);
+        con_focus(workspace);
         return;
     }
 

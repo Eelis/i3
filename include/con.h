@@ -12,6 +12,8 @@
 #ifndef I3_CON_H
 #define I3_CON_H
 
+void con_force_split_parents_redraw(Con *);
+
 /**
  * Create a new container (and attach it to the given parent, if not NULL).
  * This function only initializes the data structures.

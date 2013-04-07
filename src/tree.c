@@ -510,21 +510,6 @@ void tree_simple_next(bool forward) {
     while (con->type != CT_WORKSPACE && con_num_children(con->parent) == 1)
         con = con->parent;
 
-    if (con->type == CT_WORKSPACE) {
-        if (con_get_fullscreen_con(con, CF_GLOBAL)) return;
-
-        con = forward ? workspace_next_on_output() : workspace_prev_on_output();
-        if (!con) return;
-
-        workspace_show(con);
-
-        while (con_num_children(con) == 1)
-          con = TAILQ_FIRST(&con->nodes_head);
-
-        con_focus(con);
-        return;
-    }
-
     if (con->type == CT_FLOATING_CON) return;
 
     if (TAILQ_EMPTY(&(con->parent->nodes_head))) return;
@@ -534,6 +519,13 @@ void tree_simple_next(bool forward) {
 
     if (!next) return;
     if (!con_fullscreen_permits_focusing(next)) return;
+
+    if (con->type == CT_WORKSPACE) {
+        if (con_get_fullscreen_con(con, CF_GLOBAL)) return;
+        workspace_show(next);
+        while (con_num_children(next) == 1)
+            next = TAILQ_FIRST(&next->nodes_head);
+    }
 
     con_focus(next);
 }
