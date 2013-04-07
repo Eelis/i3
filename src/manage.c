@@ -119,7 +119,9 @@ void manage_window(xcb_window_t window, xcb_get_window_attributes_cookie_t cooki
                               utf8_title_cookie, title_cookie,
                               class_cookie, leader_cookie, transient_cookie,
                               role_cookie, startup_id_cookie, wm_hints_cookie;
-
+#ifdef USE_ICONS                              
+    xcb_get_property_cookie_t wm_icon_cookie;
+#endif
 
     geomc = xcb_get_geometry(conn, d);
 #define FREE_GEOMETRY() do { \
@@ -192,6 +194,9 @@ void manage_window(xcb_window_t window, xcb_get_window_attributes_cookie_t cooki
     role_cookie = GET_PROPERTY(A_WM_WINDOW_ROLE, 128);
     startup_id_cookie = GET_PROPERTY(A__NET_STARTUP_ID, 512);
     wm_hints_cookie = xcb_icccm_get_wm_hints(conn, window);
+#ifdef USE_ICONS
+    wm_icon_cookie = xcb_get_property_unchecked(conn, false, window, A__NET_WM_ICON, XCB_ATOM_CARDINAL, 0, UINT32_MAX);
+#endif
     /* TODO: also get wm_normal_hints here. implement after we got rid of xcb-event */
 
     DLOG("Managing window 0x%08x\n", window);
@@ -225,6 +230,9 @@ void manage_window(xcb_window_t window, xcb_get_window_attributes_cookie_t cooki
     window_update_strut_partial(cwindow, xcb_get_property_reply(conn, strut_cookie, NULL));
     window_update_role(cwindow, xcb_get_property_reply(conn, role_cookie, NULL), true);
     window_update_hints(cwindow, xcb_get_property_reply(conn, wm_hints_cookie, NULL));
+#ifdef USE_ICONS
+    window_update_icon(cwindow, xcb_get_property_reply(conn, wm_icon_cookie, NULL));
+#endif
 
     xcb_get_property_reply_t *startup_id_reply;
     startup_id_reply = xcb_get_property_reply(conn, startup_id_cookie, NULL);
