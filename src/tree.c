@@ -522,11 +522,15 @@ void tree_simple_next(bool forward) {
     if (con->type == CT_WORKSPACE) {
         if (con_get_fullscreen_con(con, CF_GLOBAL)) return;
 
-        Con *workspace = forward ? workspace_next_on_output() : workspace_prev_on_output();
-        if (!workspace) return;
+        con = forward ? workspace_next_on_output() : workspace_prev_on_output();
+        if (!con) return;
 
-        workspace_show(workspace);
-        con_focus(workspace);
+        workspace_show(con);
+
+        while (con_num_children(con) == 1)
+          con = TAILQ_FIRST(&con->nodes_head);
+
+        con_focus(con);
         return;
     }
 
