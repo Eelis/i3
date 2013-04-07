@@ -122,7 +122,7 @@ void tree_move_parent(bool forward) {
         Con *workspace = create_workspace_after(con->parent);
         con_move_to_workspace(con, workspace, true, false);
         workspace_show(workspace);
-        con_focus(workspace);
+        con_focus(con);
         return;
     }
 
