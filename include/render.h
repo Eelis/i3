@@ -26,4 +26,6 @@ void render_con(Con *con, bool render_fullscreen);
  */
 int render_deco_height(void);
 
+bool deco_drawn_by_parent(Con const *);
+
 #endif

@@ -641,20 +641,24 @@ void x_push_node(Con *con) {
     }
 
     if (con->window == NULL) {
-        /* Calculate the height of all window decorations which will be drawn on to
-         * this frame. */
-        uint32_t max_y = 0, max_height = 0;
-        TAILQ_FOREACH(current, &(con->nodes_head), nodes) {
-            Rect *dr = &(current->deco_rect);
-            if (dr->y >= max_y && dr->height >= max_height) {
-                max_y = dr->y;
-                max_height = dr->height;
-            }
-        }
-        rect.height = max_y + max_height;
-        if ((con->parent->layout == L_STACKED || con->parent->layout == L_SPLITH) &&
-            (con->layout == L_TABBED || con->layout == L_SPLITH))
+
+        if (deco_drawn_by_parent(con))
             rect.height = 0;
+        else {
+            /* Calculate the height of all window decorations which will be drawn on to
+             * this frame. */
+            uint32_t max_y = 0, max_height = 0;
+            TAILQ_FOREACH(current, &(con->nodes_head), nodes) {
+                Rect *dr = &(current->deco_rect);
+                if (dr->y >= max_y && dr->height >= max_height) {
+                    max_y = dr->y;
+                    max_height = dr->height;
+                }
+            }
+
+            rect.height = max_y + max_height;
+        }
+
         if (rect.height == 0)
             con->mapped = false;
     }

@@ -333,7 +333,7 @@ void render_con(Con *con, bool render_fullscreen) {
                     child->deco_rect.x = child->rect.x - con->rect.x;
                     child->deco_rect.y = child->rect.y - con->rect.y;
 
-                    if (!(con->layout == L_SPLITH && con->parent->layout == L_STACKED)) {
+                    if (!deco_drawn_by_parent(child)) {
                         child->rect.y += deco_height;
                         child->rect.height -= deco_height;
                     }
@@ -384,7 +384,7 @@ void render_con(Con *con, bool render_fullscreen) {
             child->deco_rect.y = y - con->rect.y;
 
             if (children > 1 || (child->border_style != BS_PIXEL && child->border_style != BS_NONE)) {
-                if (con->parent->layout != L_STACKED && con->parent->layout != L_SPLITH) {
+                if (!deco_drawn_by_parent(con)) {
                     child->rect.y += deco_height;
                     child->rect.height -= deco_height;
                 }
@@ -436,3 +436,9 @@ void render_con(Con *con, bool render_fullscreen) {
     }
     }
 }
+
+bool deco_drawn_by_parent(Con const * con) {
+  return (con->parent->layout == L_STACKED && (con->layout == L_TABBED || con->layout == L_SPLITH)) ||
+         (con->parent->layout == L_SPLITH && deco_drawn_by_parent(con->parent));
+}
+
