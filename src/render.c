@@ -70,7 +70,7 @@ static void render_l_output(Con *con) {
     Con *fullscreen = con_get_fullscreen_con(ws, CF_OUTPUT);
     if (fullscreen) {
         fullscreen->rect = con->rect;
-        x_raise_con(fullscreen);
+        x_raise_con(fullscreen, true);
         render_con(fullscreen, true);
         return;
     }
@@ -110,7 +110,7 @@ static void render_l_output(Con *con) {
 
         DLOG("child at (%d, %d) with (%d x %d)\n",
                 child->rect.x, child->rect.y, child->rect.width, child->rect.height);
-        x_raise_con(child);
+        x_raise_con(child, false);
         render_con(child, false);
     }
 }
@@ -207,7 +207,7 @@ void render_con(Con *con, bool render_fullscreen) {
     }
     if (fullscreen) {
         fullscreen->rect = rect;
-        x_raise_con(fullscreen);
+        x_raise_con(fullscreen, false);
         render_con(fullscreen, true);
         return;
     }
@@ -298,7 +298,7 @@ void render_con(Con *con, bool render_fullscreen) {
                 }
                 DLOG("floating child at (%d,%d) with %d x %d\n",
                      child->rect.x, child->rect.y, child->rect.width, child->rect.height);
-                x_raise_con(child);
+                x_raise_con(child, false);
                 render_con(child, false);
             }
         }
@@ -379,9 +379,15 @@ void render_con(Con *con, bool render_fullscreen) {
             child->rect.width = rect.width;
             child->rect.height = rect.height;
 
-            child->deco_rect.width = ceil((float)rect.width / children);
+            child->deco_rect.width = floor((float)child->rect.width / children);
             child->deco_rect.x = x - con->rect.x + i * child->deco_rect.width;
             child->deco_rect.y = y - con->rect.y;
+
+            /* Since the tab width may be something like 31,6 px per tab, we
+             * let the last tab have all the extra space (0,6 * children). */
+            if (i == (children-1)) {
+                child->deco_rect.width += (child->rect.width - (child->deco_rect.x + child->deco_rect.width));
+            }
 
             if (children > 1 || (child->border_style != BS_PIXEL && child->border_style != BS_NONE)) {
                 if (!deco_drawn_by_parent(con)) {
@@ -410,7 +416,7 @@ void render_con(Con *con, bool render_fullscreen) {
 
         DLOG("child at (%d, %d) with (%d x %d)\n",
                 child->rect.x, child->rect.y, child->rect.width, child->rect.height);
-        x_raise_con(child);
+        x_raise_con(child, false);
         render_con(child, false);
         i++;
     }
@@ -418,7 +424,7 @@ void render_con(Con *con, bool render_fullscreen) {
     /* in a stacking or tabbed container, we ensure the focused client is raised */
     if (con->layout == L_STACKED || con->layout == L_TABBED) {
         TAILQ_FOREACH_REVERSE(child, &(con->focus_head), focus_head, focused)
-            x_raise_con(child);
+            x_raise_con(child, false);
         if ((child = TAILQ_FIRST(&(con->focus_head)))) {
             /* By rendering the stacked container again, we handle the case
              * that we have a non-leaf-container inside the stack. In that
@@ -432,7 +438,7 @@ void render_con(Con *con, bool render_fullscreen) {
              * top of every stack window. That way, when a new window is opened in
              * the stack, the old window will not obscure part of the decoration
              * (it’s unmapped afterwards). */
-            x_raise_con(con);
+            x_raise_con(con, false);
     }
     }
 }
