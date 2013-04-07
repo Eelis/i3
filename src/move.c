@@ -119,6 +119,8 @@ void tree_move_parent(bool forward) {
     if (con->type == CT_WORKSPACE) return;
 
     if (con->parent->type == CT_WORKSPACE) {
+        if (con_num_children(con->parent) == 1) return;
+
         Con *workspace = create_workspace_after(con->parent);
         con_move_to_workspace(con, workspace, true, false);
         workspace_show(workspace);
