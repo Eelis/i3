@@ -194,11 +194,6 @@ void tree_move_into(bool const forward) {
 
     Con * const big = ascend_mono_splits(focused);
 
-    if (big->type == CT_WORKSPACE) {
-        DLOG("Sorry, not implemented yet: moving workspace into siblings\n");
-        return;
-    }
-
     /* Enforce the fullscreen focus restrictions. */
     if (!con_fullscreen_permits_focusing(big->parent)) {
         LOG("Cannot move out of fullscreen container\n");
@@ -219,6 +214,12 @@ void tree_move_into(bool const forward) {
 
     Con * const small = descend_mono_splits(focused);
         // we don't want to take mono splits with us
+
+    if (big->type == CT_WORKSPACE) {
+        con_move_to_workspace(small, next, true, false);
+        workspace_show(next);
+        return;
+    }
 
     push_con_back(small, next);
 
