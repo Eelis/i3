@@ -551,7 +551,7 @@ void draw_titlebar(xcb_gcontext_t const pm_gc, xcb_pixmap_t const pixmap, Con co
 
     /* 6: draw the title */
     set_font_colors(pm_gc, color->text, color->background);
-    int text_offset_y = (dr.height - config.font.height) / 2;
+    int text_offset_y = (dr.height - config.font.height) / 2 + 1;
 
     struct Window *win = con->window;
     if (win == NULL) {
@@ -581,24 +581,7 @@ void draw_titlebar(xcb_gcontext_t const pm_gc, xcb_pixmap_t const pixmap, Con co
 
         if (win->name == NULL) return;
 
-        int indent_level = 0,
-            indent_mult = 0;
-
-        Con const *il_parent = con->parent;
-        if (il_parent->layout != L_STACKED) {
-            while (1) {
-                //DLOG("il_parent = %p, layout = %d\n", il_parent, il_parent->layout);
-                if (il_parent->layout == L_STACKED)
-                    indent_level++;
-                if (il_parent->type == CT_WORKSPACE || il_parent->type == CT_DOCKAREA || il_parent->type == CT_OUTPUT)
-                    break;
-                il_parent = il_parent->parent;
-                indent_mult++;
-            }
-        }
-
-        //DLOG("indent_level = %d, indent_mult = %d\n", indent_level, indent_mult);
-        int indent_px = (indent_level * 5) * indent_mult;
+        int indent_px = 0;
 
         #ifdef USE_ICONS
             if (win->icon) indent_px += 18;
@@ -629,7 +612,7 @@ void draw_titlebar(xcb_gcontext_t const pm_gc, xcb_pixmap_t const pixmap, Con co
                     int icon_offset_y = (dr.height - 16) / 2;
 
                     xcb_image_put(conn, pixmap, pm_gc,
-                            icon, dr.x + indent_px - 16 , dr.y + icon_offset_y, 0);
+                            icon, dr.x + 2, dr.y + icon_offset_y, 0);
 
                     xcb_image_destroy(icon);
                 }
