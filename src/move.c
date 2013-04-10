@@ -151,10 +151,8 @@ void tree_swap(bool forward) {
 
     Con *con = focused;
 
-    if (con->type == CT_WORKSPACE) {
-        DLOG("Sorry, not yet implemented: swapping workspaces\n");
-        return;
-    }
+    if (con->parent->type == CT_WORKSPACE && con_num_children(con->parent) == 1)
+        con = con->parent;
 
     Con *swap = forward ? TAILQ_NEXT(con, nodes)
                         : TAILQ_PREV(con, nodes_head, nodes);
@@ -168,6 +166,12 @@ void tree_swap(bool forward) {
 
     TAILQ_REMOVE(&(con->parent->focus_head), con, focused);
     TAILQ_INSERT_HEAD(&(swap->parent->focus_head), con, focused);
+
+    if (con->type == CT_WORKSPACE) {
+        workspace_show(con);
+        con_focus(con);
+        ipc_send_workspace_focus_event(con, con);
+    }
 
     DLOG("Swapped.\n");
 }

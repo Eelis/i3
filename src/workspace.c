@@ -317,7 +317,7 @@ static void workspace_defer_update_urgent_hint_cb(EV_P_ ev_timer *w, int revents
  * For the "focus" event we send, along the usual "change" field, also the
  * current and previous workspace, in "current" and "old" respectively.
  */
-static void ipc_send_workspace_focus_event(Con *current, Con *old) {
+void ipc_send_workspace_focus_event(Con *current, Con *old) {
     setlocale(LC_NUMERIC, "C");
     yajl_gen gen = ygenalloc();
 

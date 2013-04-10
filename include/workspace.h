@@ -15,6 +15,8 @@
 #include "tree.h"
 #include "randr.h"
 
+void ipc_send_workspace_focus_event(Con *current, Con *old);
+
 /**
  * Returns a pointer to the workspace with the given number (starting at 0),
  * creating the workspace if necessary (by allocating the necessary amount of
