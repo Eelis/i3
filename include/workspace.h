@@ -15,6 +15,8 @@
 #include "tree.h"
 #include "randr.h"
 
+Con * create_workspace_after(Con * ws);
+
 void ipc_send_workspace_focus_event(Con *current, Con *old);
 
 /**

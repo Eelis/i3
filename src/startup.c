@@ -159,7 +159,14 @@ void start_application(const char *command, bool no_startup_id) {
 
         /* Save the ID and current workspace in our internal list of startup
          * sequences */
+
         Con *ws = con_get_workspace(focused);
+
+        if (focused->type == CT_WORKSPACE) {
+          ws = create_workspace_after(ws);
+          workspace_show(ws);
+        }
+
         struct Startup_Sequence *sequence = scalloc(sizeof(struct Startup_Sequence));
         sequence->id = sstrdup(sn_launcher_context_get_startup_id(context));
         sequence->workspace = sstrdup(ws->name);
