@@ -272,7 +272,7 @@ for my $app (keys %apps) {
         $choices{$name} = $app;
     }
 
-    if ('command' ~~ @entry_types) {
+    elsif ('command' ~~ @entry_types) {
         my ($command) = split(' ', $apps{$app}->{Exec});
 
         # Don’t add “geany” if “Geany” is already present.
@@ -282,7 +282,7 @@ for my $app (keys %apps) {
         $choices{basename($command)} = $app;
     }
 
-    if ('filename' ~~ @entry_types) {
+    elsif ('filename' ~~ @entry_types) {
         my $filename = basename($app, '.desktop');
 
         # Don’t add “geany” if “Geany” is already present.
